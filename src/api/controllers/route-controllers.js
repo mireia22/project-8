@@ -1,0 +1,105 @@
+const Route = require("../models/route-model");
+const Site = require("../models/site-model");
+const User = require("../models/User-model");
+
+const getAllRoutes = async (req, res, next) => {
+  try {
+    const allRoutes = await Route.find().populate("createdBy");
+    return res.status(200).json(allRoutes);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const getRouteById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const route = await Route.findById(id).populate("createdBy");
+    return res.status(200).json(route);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const postRoute = async (req, res, next) => {
+  const { name, site, longitude, height, difficulty } = req.body;
+
+  try {
+    if (!name || !site) {
+      return next(new Error("Name and Site ARE MANDATORY."));
+    }
+    const existingSite = await Site.findOne({ name: site });
+    let siteId;
+    if (existingSite) {
+      siteId = existingSite._id;
+    } else {
+      const newSite = new Site({ name: site });
+      const savedSite = await newSite.save();
+      siteId = savedSite._id;
+    }
+    const newRoute = new Route({
+      name,
+      site,
+      longitude,
+      height,
+      difficulty,
+      createdBy: req.user.id,
+    });
+
+    const savedRoute = await newRoute.save();
+
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $push: { postedRoutes: savedRoute, visitedSites: savedRoute.site } },
+      { new: true }
+    );
+
+    await Site.findByIdAndUpdate(
+      siteId,
+      { $push: { routes: savedRoute._id } },
+      { new: true }
+    );
+
+    return res.status(201).json({ message: "Posted", savedRoute });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const editRoute = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const route = await Route.findByIdAndUpdate(id, req.body, { new: true });
+    return res.status(200).json(route);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const deleteRouteById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const route = await Route.findByIdAndDelete(id);
+    return res.status(200).json({ message: "Route deleted successfully" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const deleteAllRoutes = async (req, res, next) => {
+  try {
+    const routes = await Route.deleteMany();
+    return res.status(200).json({ message: "All sites deleted successfully" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  getAllRoutes,
+  getRouteById,
+  postRoute,
+  editRoute,
+  deleteRouteById,
+  deleteAllRoutes,
+};
