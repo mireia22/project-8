@@ -4,6 +4,7 @@ const siteSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true },
     routes: [{ type: mongoose.Schema.Types.ObjectId, ref: "route" }],
+    siteImg: { type: String, trim: true },
   },
   {
     timestamps: true,

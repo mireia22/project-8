@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: process.env.ADMIN_PASSWORD,
     },
-    avatar: { type: String, trim: true, required: true },
+    avatar: { type: String, trim: true },
     postedRoutes: [{ type: mongoose.Schema.Types.ObjectId, ref: "route" }],
     visitedSites: [{ type: String, trim: true }],
   },

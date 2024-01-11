@@ -8,6 +8,7 @@ const routeSchema = new mongoose.Schema(
     difficulty: { type: String },
     site: { type: String, required: true },
     createdBy: { type: mongoose.Schema.ObjectId, ref: "user" },
+    routeImg: { type: String, trim: true },
   },
   {
     timestamps: true,

@@ -2,15 +2,16 @@ const express = require("express");
 const dotenv = require("dotenv");
 const { connectToDB } = require("./src/config/db");
 const { mainRouter } = require("./src/api/routes/main-router");
+const { configCloudinary } = require("./src/middlewares/files-middleware");
 
 const app = express();
 dotenv.config();
+configCloudinary();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/v1", mainRouter);
-
 app.use("*", (req, res, next) => {
   res.send("Route Not Found");
 });

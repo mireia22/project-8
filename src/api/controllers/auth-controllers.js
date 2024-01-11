@@ -27,7 +27,7 @@ const register = async (req, res, next) => {
       password,
       birthYear,
       role: userRole,
-      avatar,
+      avatar: req.file ? req.file.path : "no user avatar",
     });
 
     const savedUser = await newUser.save();

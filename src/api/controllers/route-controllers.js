@@ -1,3 +1,4 @@
+const { deleteImgCloudinary } = require("../../middlewares/files-middleware");
 const Route = require("../models/route-model");
 const Site = require("../models/site-model");
 const User = require("../models/User-model");
@@ -44,6 +45,7 @@ const postRoute = async (req, res, next) => {
       height,
       difficulty,
       createdBy: req.user.id,
+      routeImg: req.file ? req.file.path : "no route image",
     });
 
     const savedRoute = await newRoute.save();
@@ -69,8 +71,29 @@ const postRoute = async (req, res, next) => {
 const editRoute = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const route = await Route.findByIdAndUpdate(id, req.body, { new: true });
-    return res.status(200).json(route);
+    const { name, site, longitude, height, difficulty } = req.body;
+
+    const existingRoute = await Route.findById(id);
+
+    if (existingRoute?.routeImg && req.file) {
+      deleteImgCloudinary(existingRoute.routeImg);
+    }
+
+    const updatedRoute = await Route.findByIdAndUpdate(
+      id,
+      {
+        name,
+        site,
+        longitude,
+        height,
+        difficulty,
+        routeImg: req.file ? req.file.path : "No route image",
+      },
+      {
+        new: true,
+      }
+    );
+    return res.status(200).json(updatedRoute);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
@@ -80,6 +103,9 @@ const deleteRouteById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const route = await Route.findByIdAndDelete(id);
+    if (route?.routeImg) {
+      deleteImgCloudinary(route.routeImg);
+    }
     return res.status(200).json({ message: "Route deleted successfully" });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -88,8 +114,14 @@ const deleteRouteById = async (req, res, next) => {
 
 const deleteAllRoutes = async (req, res, next) => {
   try {
-    const routes = await Route.deleteMany();
-    return res.status(200).json({ message: "All sites deleted successfully" });
+    const routes = await Route.find();
+    for (const route of routes) {
+      await Route.findByIdAndDelete(route._id);
+      if (route.routeImg) {
+        deleteImgCloudinary(route.routeImg);
+      }
+    }
+    return res.status(200).json({ message: "All routes deleted successfully" });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
