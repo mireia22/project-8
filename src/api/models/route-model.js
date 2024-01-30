@@ -4,7 +4,6 @@ const routeSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     longitude: { type: Number },
-    height: { type: Number },
     difficulty: { type: String },
     site: { type: String, required: true },
     createdBy: { type: mongoose.Schema.ObjectId, ref: "user" },

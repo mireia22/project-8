@@ -23,7 +23,7 @@ const getRouteById = async (req, res, next) => {
 };
 
 const postRoute = async (req, res, next) => {
-  const { name, site, longitude, height, difficulty } = req.body;
+  const { name, site, longitude, difficulty } = req.body;
 
   try {
     if (!name || !site) {
@@ -42,7 +42,6 @@ const postRoute = async (req, res, next) => {
       name,
       site,
       longitude,
-      height,
       difficulty,
       createdBy: req.user.id,
       routeImg: req.file ? req.file.path : "no route image",
