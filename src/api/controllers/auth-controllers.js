@@ -65,12 +65,4 @@ const login = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res, next) => {
-  try {
-    const token = null;
-    return res.status(201).json({ message: "User logged out", token: token });
-  } catch (error) {
-    return next(error);
-  }
-};
-module.exports = { register, login, logout };
+module.exports = { register, login };
